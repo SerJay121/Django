@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Замовлення №{{ order.pk }}{% endblock %}
+{% block content %}
+<h1>Замовлення №{{ order.pk }}</h1>
+<p>Статус: <b>{{ order.get_status_display }}</b> · {{ order.created_at|date:"d.m.Y H:i" }}</p>
+<p>Отримувач: {{ order.full_name }}, {{ order.phone }}<br>Адреса: {{ order.shipping_address }}<br>Оплата: {{ order.get_payment_method_display }}</p>
+<table>
+  <tr><th>Товар</th><th>Ціна</th><th>К-сть</th><th>Сума</th></tr>
+  {% for item in order.items.all %}
+  <tr><td><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></td><td>{{ item.price }}</td><td>{{ item.quantity }}</td><td>{{ item.subtotal }}</td></tr>
+  {% endfor %}
+</table>
+<p class="total">Разом: <b>{{ order.total_price }} ₴</b></p>
+{% if order.status == "pending" or order.status == "paid" %}
+<form method="post" action="{% url 'orders:cancel' order.pk %}">{% csrf_token %}<button type="submit">Скасувати замовлення</button></form>
+{% endif %}
+<p><a href="{% url 'users:dashboard' %}">← До кабінету</a></p>
+{% endblock %}

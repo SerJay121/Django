@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hop &amp; Barley{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="{% url 'products:list' %}">Hop &amp; Barley</a>
+  <nav>
+    <a href="{% url 'products:catalog' %}">Каталог</a>
+    <a href="{% url 'orders:cart' %}">Кошик ({{ cart_count }})</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'users:dashboard' %}">{{ user.username }}</a>
+      <form method="post" action="{% url 'users:logout' %}" class="inline">
+        {% csrf_token %}<button type="submit">Вийти</button>
+      </form>
+    {% else %}
+      <a href="{% url 'users:login' %}">Увійти</a>
+      <a href="{% url 'users:register' %}">Реєстрація</a>
+    {% endif %}
+  </nav>
+</header>
+<main class="container">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="site-footer">© Hop &amp; Barley</footer>
+</body>
+</html>

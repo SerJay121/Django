@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Профіль{% endblock %}
+{% block content %}
+<h1>Редагування профілю</h1>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Зберегти</button></form>
+<p><a href="{% url 'users:password_change' %}">Змінити пароль</a> · <a href="{% url 'users:dashboard' %}">← До кабінету</a></p>
+{% endblock %}

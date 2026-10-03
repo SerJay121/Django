@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Каталог{% endblock %}
+{% block content %}
+<div class="layout">
+  <aside>
+    <h3>Категорії</h3>
+    <ul>
+      {% for c in categories %}
+        <li><a href="?category={{ c.slug }}">{{ c.name }}</a>
+          {% if c.children.all %}
+            <ul>{% for ch in c.children.all %}
+              <li><a href="?category={{ ch.slug }}">{{ ch.name }}</a></li>
+            {% endfor %}</ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <form method="get">
+      {{ filter.form.as_p }}
+      <button type="submit">Застосувати</button>
+      <a href="{{ request.path }}">Скинути</a>
+    </form>
+  </aside>
+  <section>
+    <div class="grid">
+      {% for p in products %}
+        <article class="card">
+          <a href="{{ p.get_absolute_url }}">
+            {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}">{% else %}<div class="noimg"></div>{% endif %}
+            <h3>{{ p.name }}</h3>
+          </a>
+          <p class="price">{{ p.price }} ₴</p>
+          <p>{% if p.avg_rating %}★ {{ p.avg_rating|floatformat:1 }} ({{ p.reviews_count }}){% else %}Без відгуків{% endif %}</p>
+          {% if p.stock > 0 %}
+            <form method="post" action="{% url 'orders:cart_add' p.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit">У кошик</button>
+            </form>
+          {% else %}
+            <span class="muted">Немає в наявності</span>
+          {% endif %}
+        </article>
+      {% empty %}
+        <p>Нічого не знайдено.</p>
+      {% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+  </section>
+</div>
+{% endblock %}

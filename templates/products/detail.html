@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<article class="product">
+  {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
+  <h1>{{ product.name }}</h1>
+  <p class="muted">Категорія: {{ product.category.name }}</p>
+  <p>{% if product.avg_rating %}★ {{ product.avg_rating|floatformat:1 }} ({{ product.reviews_count }} відгуків){% else %}Ще немає відгуків{% endif %}</p>
+  <p>{{ product.description|linebreaksbr }}</p>
+  <p class="price">{{ product.price }} ₴</p>
+  {% if product.stock > 0 %}
+    <p class="muted">В наявності: {{ product.stock }}</p>
+    <form method="post" action="{% url 'orders:cart_add' product.pk %}">
+      {% csrf_token %}
+      {{ add_form.quantity }}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button type="submit">Додати в кошик</button>
+    </form>
+  {% else %}
+    <p class="warn">Немає в наявності</p>
+  {% endif %}
+</article>
+
+<section>
+  <h2>Відгуки</h2>
+  {% for r in reviews %}
+    <div class="review"><b>{{ r.user.username }}</b> — {{ r.rating }}/5 <small>{{ r.created_at|date:"d.m.Y" }}</small>
+      <p>{{ r.comment|linebreaksbr }}</p></div>
+  {% empty %}
+    <p>Відгуків поки немає.</p>
+  {% endfor %}
+
+  {% if not user.is_authenticated %}
+    <p><a href="{% url 'users:login' %}?next={{ request.path }}">Увійдіть</a>, щоб залишити відгук після покупки.</p>
+  {% elif already_reviewed %}
+    <p class="muted">Ви вже залишили відгук.</p>
+  {% elif can_review %}
+    <form method="post" action="{% url 'products:review' product.slug %}">
+      {% csrf_token %}{{ review_form.as_p }}<button type="submit">Надіслати відгук</button>
+    </form>
+  {% else %}
+    <p class="muted">Відгук можна залишити лише після покупки цього товару.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Оформлення замовлення{% endblock %}
+{% block content %}
+<h1>Оформлення замовлення</h1>
+<ul>
+  {% for line in lines %}<li>{{ line.product.name }} × {{ line.quantity }} = {{ line.subtotal }} ₴</li>{% endfor %}
+</ul>
+<p class="total">Разом: <b>{{ total }} ₴</b></p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Підтвердити замовлення</button>
+</form>
+{% endblock %}

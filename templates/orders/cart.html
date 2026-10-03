@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Кошик{% endblock %}
+{% block content %}
+<h1>Кошик</h1>
+{% if lines %}
+<table>
+  <tr><th>Товар</th><th>Ціна</th><th>Кількість</th><th>Сума</th><th></th></tr>
+  {% for line in lines %}
+  <tr>
+    <td><a href="{{ line.product.get_absolute_url }}">{{ line.product.name }}</a></td>
+    <td>{{ line.product.price }} ₴</td>
+    <td>
+      <form method="post" action="{% url 'orders:cart_update' line.product.pk %}">
+        {% csrf_token %}
+        <input type="number" name="quantity" value="{{ line.quantity }}" min="0" max="99">
+        <button type="submit">Оновити</button>
+      </form>
+      {% if not line.is_available %}<small class="warn">На складі лише {{ line.product.stock }}</small>{% endif %}
+    </td>
+    <td>{{ line.subtotal }} ₴</td>
+    <td><form method="post" action="{% url 'orders:cart_remove' line.product.pk %}">{% csrf_token %}<button type="submit">Видалити</button></form></td>
+  </tr>
+  {% endfor %}
+</table>
+<p class="total">Разом: <b>{{ total }} ₴</b></p>
+<a class="btn" href="{% url 'orders:checkout' %}">Оформити замовлення</a>
+{% else %}
+<p>Кошик порожній. <a href="{% url 'products:catalog' %}">До каталогу</a></p>
+{% endif %}
+{% endblock %}

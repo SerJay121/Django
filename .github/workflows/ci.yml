@@ -1,0 +1,38 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: myshop
+          POSTGRES_USER: myshop
+          POSTGRES_PASSWORD: myshop
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U myshop" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_NAME: myshop
+      DB_USER: myshop
+      DB_PASSWORD: myshop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install uv && uv pip install --system -r pyproject.toml --extra dev
+      - run: ruff check .
+      - run: mypy .
+      - run: pytest --cov --cov-report=term-missing --cov-fail-under=80
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t myshop .

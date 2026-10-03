@@ -1,0 +1,26 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+{% if summary %}
+<div style="margin:0 0 20px;padding:12px;border:1px solid var(--hairline-color,#ccc)">
+  <h2>Аналітика (без скасованих)</h2>
+  <p>Виторг: <b>{{ summary.revenue }} ₴</b> ·
+     Замовлень: <b>{{ summary.orders_count }}</b> ·
+     Середній чек: <b>{{ summary.average_order_value|floatformat:2 }} ₴</b></p>
+  <div style="display:flex;gap:40px;flex-wrap:wrap">
+    <table>
+      <caption>Топ товарів</caption>
+      <tr><th>Товар</th><th>Продано</th><th>Виторг</th></tr>
+      {% for p in top_products %}<tr><td>{{ p.name }}</td><td>{{ p.units_sold }}</td><td>{{ p.revenue }}</td></tr>
+      {% empty %}<tr><td colspan="3">Даних немає</td></tr>{% endfor %}
+    </table>
+    <table>
+      <caption>Останні 14 днів</caption>
+      <tr><th>День</th><th>Замовлень</th><th>Виторг</th></tr>
+      {% for d in daily %}<tr><td>{{ d.day|date:"d.m" }}</td><td>{{ d.orders_count }}</td><td>{{ d.revenue }}</td></tr>
+      {% empty %}<tr><td colspan="3">Даних немає</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
